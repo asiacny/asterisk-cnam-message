@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+import os, sys, time
+
+if len(sys.argv) < 2:
+  print 'usage: %s <extension> your message here...' % os.path.basename(sys.argv[0])
+  raise SystemExit
+
+recipient = sys.argv[1]
+words = sys.argv[2:]
+
+call = '''Channel: sip/%(to)s
+MaxRetries: 0
+RetryTime: 60
+WaitTime: 1
+Context: call-file-test
+Extension: %(to)s
+Callerid: "%(msg)s" <1>
+'''
+
+call_filename = '/tmp/cnam-message.py.call'
+destination_filename = '/var/spool/asterisk/outgoing/cnam-message.py.call.%s'
+for word in words:
+  with open(call_filename, 'w') as f:
+    f.write(call % { 'to': recipient, 'msg': word } )
+  os.rename(call_filename, destination_filename % time.time())
+  time.sleep(1.1)
